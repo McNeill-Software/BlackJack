@@ -1,0 +1,10 @@
+Requirements:
+    -52 Graphical Cards
+    -Green table
+    -Score system
+    -Betting System
+    -Music?
+    -Sound effects
+    -AI
+    -Main Menu?
+    -Top-down view
