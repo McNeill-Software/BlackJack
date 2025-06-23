@@ -37,6 +37,10 @@ public class Hand {
         System.out.println("His hidden card was " + m_hand.getLast().toString());
     }
 
+    public ArrayList<Card> getCards() {
+        return m_hand;
+    }
+
     public int getTotal() {
         int total = 0;
         for (Card card : m_hand) {

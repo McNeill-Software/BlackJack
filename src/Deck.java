@@ -10,7 +10,7 @@ public class Deck {
     }
 
     private void initialiseDeck() {
-        String[] ranks = {"2",  "3", "4", "5", "6", "7", "8", "9", "10", "Joker", "Queen", "King", "Ace"};
+        String[] ranks = {"2",  "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
         String[] suits = {"Clubs", "Diamonds", "Hearts", "Spades"};
         int[] values = {2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11};
 
@@ -22,11 +22,15 @@ public class Deck {
                 m_deck.add(new Card(ranks[i], suit, values[i]));
             }
         }
-        Collections.shuffle(m_deck);
+        shuffle();
     }
 
     public void reset() {
         initialiseDeck();
+    }
+
+    public void shuffle() {
+        Collections.shuffle(m_deck);
     }
 
     public void showDeck() {

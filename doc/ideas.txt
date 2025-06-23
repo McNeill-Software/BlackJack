@@ -1,6 +1,6 @@
 Requirements:
-    -52 Graphical Cards
-    -Green table
+    -52 Graphical Cards ✓
+    -Green table ✓
     -Score system
     -Betting System
     -Music?

@@ -22,8 +22,18 @@ public class Card {
         return m_value;
     }
 
+    public String getImageFileName() {
+        return "res/images/cards/" + m_rank.toLowerCase() + "_of_" + m_suit.toLowerCase() + ".png";
+    }
+
     @Override
     public String toString() {
         return m_rank + " of " +  m_suit;
+    }
+
+    public static void main(String[] args) {
+        Card card = new Card("Ace", "Spades", 11);
+        System.out.println(card.getImageFileName());
+        System.out.println("src/res/images/cards/ace_of_spades.png");
     }
 }
