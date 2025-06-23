@@ -1,19 +1,25 @@
+import sound.Sound;
+
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.net.URL;
 
-public class GameGUI extends JFrame {
+public class GameGUI extends JFrame implements ActionListener {
     private Deck deck;
     private Hand playerHand;
     private Hand dealerHand;
+    private Sound cardSound;
 
     private JTextArea gameLog;
     private JLabel playerCardTotal, dealerCardTotal;
     private JButton hitBtn, standBtn, newGameBtn;
     private JPanel playerPanel, dealerPanel;
 
-    public GameGUI() {
+    public GameGUI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         setTitle("BlackJack");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -26,7 +32,6 @@ public class GameGUI extends JFrame {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setOpaque(false);
         panel.add(mainPanel, BorderLayout.CENTER);
-
 
         deck = new Deck();
         playerHand = new Hand();
@@ -46,9 +51,7 @@ public class GameGUI extends JFrame {
         dealerPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
         dealerPanel.setOpaque(false);
         dealerPanel.setMaximumSize(new Dimension(getWidth(), 160));
-        mainPanel.add(Box.createVerticalStrut(20));
-        mainPanel.add(dealerPanel);
-
+        panel.add(dealerPanel, BorderLayout.NORTH);
 
         //Button
         JPanel buttonPanel = new JPanel();
@@ -58,11 +61,14 @@ public class GameGUI extends JFrame {
         buttonPanel.add(standBtn);
         buttonPanel.add(newGameBtn);
         mainPanel.add(Box.createVerticalStrut(20));
+        mainPanel.add(Box.createVerticalGlue());
         mainPanel.add(buttonPanel);
+        hitBtn.addActionListener(this);
 
         //Player
         playerPanel = new JPanel();
         playerPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        playerPanel.setBackground(Color.white);
         playerPanel.setOpaque(false);
         playerPanel.setMaximumSize(new Dimension(getWidth(), 160));
         mainPanel.add(Box.createVerticalStrut(20));
@@ -72,13 +78,17 @@ public class GameGUI extends JFrame {
         playerCardTotal = new JLabel();
         playerCardTotal.setText("adsd");
         playerCardTotal.setFont(new Font("Monospaced", Font.PLAIN, 24));
-        add(playerCardTotal, BorderLayout.NORTH);
+        playerCardTotal.setBounds(0, 200, 100, 500);
+        mainPanel.add(playerCardTotal);
 
         dealerCardTotal = new JLabel();
         dealerCardTotal.setText("adsd");
         dealerCardTotal.setFont(new Font("Monospaced", Font.PLAIN, 24));
         dealerCardTotal.setHorizontalAlignment(JLabel.CENTER);
-        add(dealerCardTotal, BorderLayout.EAST);
+        //add(dealerCardTotal, BorderLayout.EAST);
+
+        //Audio
+        cardSound = new Sound("src/res/audio/card-sound.wav");
 
         setVisible(true);
         startNewGame();
@@ -133,4 +143,16 @@ public class GameGUI extends JFrame {
 
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == hitBtn) {
+            System.out.println("You hit!");
+            Card card = deck.dealCard();
+            playerHand.addCard(card);
+            playerPanel.add(createCardLabel(card));
+            cardSound.play();
+            playerPanel.revalidate();
+            playerPanel.repaint();
+        }
+    }
 }

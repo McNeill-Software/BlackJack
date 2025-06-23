@@ -30,10 +30,4 @@ public class Card {
     public String toString() {
         return m_rank + " of " +  m_suit;
     }
-
-    public static void main(String[] args) {
-        Card card = new Card("Ace", "Spades", 11);
-        System.out.println(card.getImageFileName());
-        System.out.println("src/res/images/cards/ace_of_spades.png");
-    }
 }
