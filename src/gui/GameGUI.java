@@ -1,4 +1,9 @@
+package gui;
+
 import sound.Sound;
+import model.Card;
+import model.Deck;
+import model.Hand;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -7,6 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 public class GameGUI extends JFrame implements ActionListener {
     private Deck deck;
@@ -17,16 +23,15 @@ public class GameGUI extends JFrame implements ActionListener {
     private JTextArea gameLog;
     private JLabel playerCardTotal, dealerCardTotal;
     private JButton hitBtn, standBtn, newGameBtn;
-    private JPanel playerPanel, dealerPanel;
-
-    private int playerCardAmount, dealerCardAmount;
+    private JPanel playerPanel, dealerPanel, centerWrapper, buttonPanel;
+    private BackgroundImagePanel panel;
 
     public GameGUI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         setTitle("BlackJack");
         setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        BackgroundImagePanel panel = new BackgroundImagePanel("src/res/images/table/table.png");
+        panel = new BackgroundImagePanel("res/images/table/table.png");
         panel.setLayout(new BorderLayout());
         setContentPane(panel);
 
@@ -56,7 +61,7 @@ public class GameGUI extends JFrame implements ActionListener {
         panel.add(dealerPanel, BorderLayout.NORTH);
 
         //Button
-        JPanel buttonPanel = new JPanel();
+        buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setBackground(Color.white);
         buttonPanel.setOpaque(false);
@@ -64,10 +69,8 @@ public class GameGUI extends JFrame implements ActionListener {
         buttonPanel.add(standBtn);
         buttonPanel.add(newGameBtn);
         buttonPanel.setPreferredSize(new Dimension(300, 50));
-        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper = new JPanel(new GridBagLayout());
         centerWrapper.setOpaque(false);
-        centerWrapper.add(buttonPanel); // This centers it
-        panel.add(centerWrapper, BorderLayout.CENTER);
 
         //panel.add(buttonPanel,  BorderLayout.CENTER);
         hitBtn.addActionListener(this);
@@ -84,24 +87,46 @@ public class GameGUI extends JFrame implements ActionListener {
 
         //Card text totals
         playerCardTotal = new JLabel();
-        playerCardAmount = 0;
-        playerCardTotal.setText("Total: " + playerCardAmount);
         playerCardTotal.setFont(new Font("Monospaced", Font.PLAIN, 24));
-        playerCardTotal.setBounds(0, 800, 100, 500);
         playerCardTotal.setForeground(Color.white);
-        panel.add(playerCardTotal);
+        playerPanel.add(playerCardTotal);
+        panel.add(playerCardTotal, BorderLayout.WEST);
 
         dealerCardTotal = new JLabel();
-        dealerCardTotal.setText("adsd");
         dealerCardTotal.setFont(new Font("Monospaced", Font.PLAIN, 24));
-        dealerCardTotal.setHorizontalAlignment(JLabel.CENTER);
-        //add(dealerCardTotal, BorderLayout.EAST);
+        dealerCardTotal.setForeground(Color.white);
+        dealerPanel.add(dealerCardTotal);
+        panel.add(dealerCardTotal, BorderLayout.EAST);
 
         //Audio
-        cardSound = new Sound("src/res/audio/card-sound.wav");
+        cardSound = new Sound("res/audio/card-sound.wav");
 
         setVisible(true);
         startNewGame();
+    }
+
+    private void addButton() {
+        centerWrapper.add(buttonPanel);
+        panel.add(centerWrapper, BorderLayout.CENTER);
+
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    private void removeButton() {
+        centerWrapper.remove(buttonPanel);
+        panel.remove(centerWrapper);
+
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    private int getPlayerCardAmount() {
+        return playerHand.getTotal();
+    }
+
+    private int getDealerCardAmount() {
+        return dealerHand.getTotal();
     }
 
     private JLabel createCardLabel(Card card) {
@@ -118,7 +143,7 @@ public class GameGUI extends JFrame implements ActionListener {
     }
 
     private JLabel createHiddenCard() {
-        String filename = "res/images/cards/facedown.png";
+        String filename = "/images/cards/facedown.png";
         System.out.println("Loading image: " + filename);
         URL resource = getClass().getResource(filename);
         if (resource == null) {
@@ -134,39 +159,86 @@ public class GameGUI extends JFrame implements ActionListener {
         dealerPanel.remove(1);
         Card card = dealerHand.getCards().getLast();
         dealerPanel.add(createCardLabel(card));
+        dealerCardTotal.setText("Dealer total: " + dealerHand.getTotal());
         dealerPanel.revalidate();
         dealerPanel.repaint();
     }
 
-    private void showPlayerHand() {
-        playerPanel.removeAll();
-        for (Card card : playerHand.getCards()) {
-            playerPanel.add(createCardLabel(card));
-        }
-        playerPanel.revalidate();
-        playerPanel.repaint();
-    }
+    private void showAllHands() {
 
-    private void showDealerHand() {
-        dealerPanel.removeAll();
-        Card card = dealerHand.getCards().getFirst();
-        dealerPanel.add(createCardLabel(card));
-        dealerPanel.add(createHiddenCard());
-        dealerPanel.revalidate();
-        dealerPanel.repaint();
+        // Steps for showing each card with delay
+        List<Runnable> steps = List.of(
+                () -> {
+                    playerPanel.add(createCardLabel(playerHand.getCards().get(0)));
+                    cardSound.play();
+                    playerPanel.revalidate();
+                    playerPanel.repaint();
+                },
+                () -> {
+                    dealerPanel.add(createCardLabel(dealerHand.getCards().get(0)));
+                    cardSound.play();
+                    dealerPanel.revalidate();
+                    dealerPanel.repaint();
+                },
+                () -> {
+                    playerPanel.add(createCardLabel(playerHand.getCards().get(1)));
+                    cardSound.play();
+                    playerPanel.revalidate();
+                    playerPanel.repaint();
+                },
+                () -> {
+                    dealerPanel.add(createHiddenCard());
+                    cardSound.play();
+                    dealerPanel.revalidate();
+                    dealerPanel.repaint();
+                }
+        );
+
+        final int delay = 500; // 500ms between steps
+        final int[] step = {0};
+
+        Timer timer = new Timer(delay, null);
+        timer.addActionListener(e -> {
+            if (step[0] < steps.size()) {
+                steps.get(step[0]).run();
+                step[0]++;
+            } else {
+                timer.stop(); // Stop when done
+                addButton();
+            }
+        });
+        timer.setInitialDelay(0);
+        timer.start();
     }
 
     private void startNewGame() {
-        deck.shuffle();
+        deck.reset();
         playerHand.removeAllCards();
         dealerHand.removeAllCards();
+
+        playerPanel.removeAll();
+        dealerPanel.removeAll();
+        playerPanel.revalidate();
+        dealerPanel.revalidate();
+        playerPanel.repaint();
+        dealerPanel.repaint();
+
+        removeButton();
 
         playerHand.addCard(deck.dealCard());
         dealerHand.addCard(deck.dealCard());
         playerHand.addCard(deck.dealCard());
         dealerHand.addCard(deck.dealCard());
-        showPlayerHand();
-        showDealerHand();
+
+        playerCardTotal.setText("Player Total: " + getPlayerCardAmount());
+        playerCardTotal.revalidate();
+        playerCardTotal.repaint();
+
+        dealerCardTotal.setText("Dealer Total: ??");
+        dealerCardTotal.revalidate();
+        dealerCardTotal.repaint();
+
+        showAllHands();
     }
 
     public void play() {
@@ -190,6 +262,9 @@ public class GameGUI extends JFrame implements ActionListener {
             Card card = deck.dealCard();
             dealerHand.addCard(card);
             dealerPanel.add(createCardLabel(card));
+            dealerCardTotal.setText("Dealer Total: " + getDealerCardAmount());
+            dealerCardTotal.revalidate();
+            dealerCardTotal.repaint();
             cardSound.play();
             dealerPanel.revalidate();
             dealerPanel.repaint();
@@ -215,6 +290,7 @@ public class GameGUI extends JFrame implements ActionListener {
             Card card = deck.dealCard();
             playerHand.addCard(card);
             playerPanel.add(createCardLabel(card));
+            playerCardTotal.setText("Player Total: " + getPlayerCardAmount());
             cardSound.play();
             playerPanel.revalidate();
             playerPanel.repaint();

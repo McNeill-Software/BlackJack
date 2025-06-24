@@ -1,3 +1,5 @@
+package model;
+
 public class Card {
 
     private final String m_rank;
@@ -23,7 +25,7 @@ public class Card {
     }
 
     public String getImageFileName() {
-        return "res/images/cards/" + m_rank.toLowerCase() + "_of_" + m_suit.toLowerCase() + ".png";
+        return "/images/cards/" + m_rank.toLowerCase() + "_of_" + m_suit.toLowerCase() + ".png";
     }
 
     @Override
