@@ -56,30 +56,36 @@ public class GameGUI extends JFrame implements ActionListener {
         //Button
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.white);
         buttonPanel.setOpaque(false);
         buttonPanel.add(hitBtn);
         buttonPanel.add(standBtn);
         buttonPanel.add(newGameBtn);
-        mainPanel.add(Box.createVerticalStrut(20));
-        mainPanel.add(Box.createVerticalGlue());
-        mainPanel.add(buttonPanel);
+        buttonPanel.setPreferredSize(new Dimension(300, 50));
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setOpaque(false);
+        centerWrapper.add(buttonPanel); // This centers it
+        panel.add(centerWrapper, BorderLayout.CENTER);
+
+        //panel.add(buttonPanel,  BorderLayout.CENTER);
         hitBtn.addActionListener(this);
+        newGameBtn.addActionListener(this);
+        standBtn.addActionListener(this);
 
         //Player
         playerPanel = new JPanel();
         playerPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         playerPanel.setBackground(Color.white);
-        playerPanel.setOpaque(false);
+        //playerPanel.setOpaque(false);
         playerPanel.setMaximumSize(new Dimension(getWidth(), 160));
-        mainPanel.add(Box.createVerticalStrut(20));
-        mainPanel.add(playerPanel);
+        panel.add(playerPanel, BorderLayout.SOUTH);
 
-        //Card totals
+        //Card text totals
         playerCardTotal = new JLabel();
         playerCardTotal.setText("adsd");
         playerCardTotal.setFont(new Font("Monospaced", Font.PLAIN, 24));
-        playerCardTotal.setBounds(0, 200, 100, 500);
-        mainPanel.add(playerCardTotal);
+        playerCardTotal.setBounds(0, 500, 100, 500);
+        //panel.add(playerCardTotal);
 
         dealerCardTotal = new JLabel();
         dealerCardTotal.setText("adsd");
@@ -107,6 +113,26 @@ public class GameGUI extends JFrame implements ActionListener {
         return new JLabel(new ImageIcon(scaled));
     }
 
+    private JLabel createHiddenCard() {
+        String filename = "res/images/cards/facedown.png";
+        System.out.println("Loading image: " + filename);
+        URL resource = getClass().getResource(filename);
+        if (resource == null) {
+            System.err.println("ERROR: Image not found at " + filename);
+            return new JLabel("Image not found");
+        }
+        ImageIcon icon = new ImageIcon(resource);
+        Image scaled = icon.getImage().getScaledInstance(80, 120, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(scaled));
+    }
+
+    private void revealHiddenCard() {
+        dealerPanel.remove(1);
+        Card card = dealerHand.getCards().getLast();
+        dealerPanel.add(createCardLabel(card));
+        dealerPanel.revalidate();
+        dealerPanel.repaint();
+    }
 
     private void showPlayerHand() {
         playerPanel.removeAll();
@@ -119,9 +145,9 @@ public class GameGUI extends JFrame implements ActionListener {
 
     private void showDealerHand() {
         dealerPanel.removeAll();
-        for (Card card : dealerHand.getCards()) {
-            dealerPanel.add(createCardLabel(card));
-        }
+        Card card = dealerHand.getCards().getFirst();
+        dealerPanel.add(createCardLabel(card));
+        dealerPanel.add(createHiddenCard());
         dealerPanel.revalidate();
         dealerPanel.repaint();
     }
@@ -140,7 +166,21 @@ public class GameGUI extends JFrame implements ActionListener {
     }
 
     public void play() {
+        while (true) {
+            if (playerHand.getTotal() > 21) {
+                System.out.println("You lost!");
+                break;
+            }
+        }
+    }
 
+    private void dealerTurn() {
+        Card card = deck.dealCard();
+        dealerHand.addCard(card);
+        dealerPanel.add(createCardLabel(card));
+        cardSound.play();
+        dealerPanel.revalidate();
+        dealerPanel.repaint();
     }
 
     @Override
@@ -153,6 +193,13 @@ public class GameGUI extends JFrame implements ActionListener {
             cardSound.play();
             playerPanel.revalidate();
             playerPanel.repaint();
+        }
+        if (e.getSource() == newGameBtn) {
+            startNewGame();
+        }
+        if (e.getSource() == standBtn) {
+            revealHiddenCard();
+            dealerTurn();
         }
     }
 }

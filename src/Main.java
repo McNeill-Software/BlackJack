@@ -6,7 +6,7 @@ public class Main {
 
     public static void main(String[] args) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         GameGUI gui =  new GameGUI();
-        gui.setVisible(true);
+        gui.play();
 
     }
 
