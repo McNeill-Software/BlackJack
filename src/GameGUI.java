@@ -19,6 +19,8 @@ public class GameGUI extends JFrame implements ActionListener {
     private JButton hitBtn, standBtn, newGameBtn;
     private JPanel playerPanel, dealerPanel;
 
+    private int playerCardAmount, dealerCardAmount;
+
     public GameGUI() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         setTitle("BlackJack");
         setSize(1200, 800);
@@ -76,16 +78,18 @@ public class GameGUI extends JFrame implements ActionListener {
         playerPanel = new JPanel();
         playerPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         playerPanel.setBackground(Color.white);
-        //playerPanel.setOpaque(false);
+        playerPanel.setOpaque(false);
         playerPanel.setMaximumSize(new Dimension(getWidth(), 160));
         panel.add(playerPanel, BorderLayout.SOUTH);
 
         //Card text totals
         playerCardTotal = new JLabel();
-        playerCardTotal.setText("adsd");
+        playerCardAmount = 0;
+        playerCardTotal.setText("Total: " + playerCardAmount);
         playerCardTotal.setFont(new Font("Monospaced", Font.PLAIN, 24));
-        playerCardTotal.setBounds(0, 500, 100, 500);
-        //panel.add(playerCardTotal);
+        playerCardTotal.setBounds(0, 800, 100, 500);
+        playerCardTotal.setForeground(Color.white);
+        panel.add(playerCardTotal);
 
         dealerCardTotal = new JLabel();
         dealerCardTotal.setText("adsd");
@@ -166,21 +170,42 @@ public class GameGUI extends JFrame implements ActionListener {
     }
 
     public void play() {
+        playerTurn();
+    }
+
+    private void playerTurn() {
         while (true) {
             if (playerHand.getTotal() > 21) {
                 System.out.println("You lost!");
+                break;
+            } else if (playerHand.getTotal() == 21) {
+                System.out.println("You win!");
                 break;
             }
         }
     }
 
     private void dealerTurn() {
-        Card card = deck.dealCard();
-        dealerHand.addCard(card);
-        dealerPanel.add(createCardLabel(card));
-        cardSound.play();
-        dealerPanel.revalidate();
-        dealerPanel.repaint();
+        if (dealerHand.getTotal() < 17) {
+            Card card = deck.dealCard();
+            dealerHand.addCard(card);
+            dealerPanel.add(createCardLabel(card));
+            cardSound.play();
+            dealerPanel.revalidate();
+            dealerPanel.repaint();
+        } else if (dealerHand.getTotal() < 21 && dealerHand.getTotal() >= 17) {
+            findWinner();
+        } else if (dealerHand.getTotal() > 21) {
+            System.out.println("You win!");
+        }
+    }
+
+    private void findWinner() {
+        if (playerHand.getTotal() < 21 && playerHand.getTotal() > dealerHand.getTotal()) {
+            System.out.println("You won!");
+        } else if (playerHand.getTotal() == dealerHand.getTotal()) {
+            System.out.println("It's a tie!");
+        }
     }
 
     @Override

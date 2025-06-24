@@ -13,7 +13,6 @@ public class Sound {
         file = new File(filePath);
         audioStream = AudioSystem.getAudioInputStream(file);
         clip = AudioSystem.getClip();
-
         clip.open(audioStream);
     }
 

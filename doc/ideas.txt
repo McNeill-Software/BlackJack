@@ -4,7 +4,7 @@ Requirements:
     -Score system
     -Betting System
     -Music?
-    -Sound effects
+    -Sound effects ✓
     -AI
     -Main Menu?
-    -Top-down view
+    -Top-down view ✓

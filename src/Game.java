@@ -126,9 +126,4 @@ public class Game {
             System.exit(0);
         }
     }
-
-    public static void main(String[] args) {
-        Game game = new Game();
-        game.play();
-    }
 }
