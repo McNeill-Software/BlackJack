@@ -246,16 +246,21 @@ public class GameGUI extends JFrame implements ActionListener {
     }
 
     private void playerTurn() {
-        while (true) {
+
+        if (playerHand.getTotal() == 21) {
+            System.out.println("You win!");
+        }
+            Card card = deck.dealCard();
+            playerHand.addCard(card);
+            playerPanel.add(createCardLabel(card));
+            playerCardTotal.setText("Player Total: " + getPlayerCardAmount());
+            cardSound.play();
+            playerPanel.revalidate();
+            playerPanel.repaint();
             if (playerHand.getTotal() > 21) {
-                System.out.println("You lost!");
-                break;
-            } else if (playerHand.getTotal() == 21) {
-                System.out.println("You win!");
-                break;
+                System.out.println("You lose!");
             }
         }
-    }
 
     private void dealerTurn() {
         if (dealerHand.getTotal() < 17) {
@@ -286,14 +291,7 @@ public class GameGUI extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == hitBtn) {
-            System.out.println("You hit!");
-            Card card = deck.dealCard();
-            playerHand.addCard(card);
-            playerPanel.add(createCardLabel(card));
-            playerCardTotal.setText("Player Total: " + getPlayerCardAmount());
-            cardSound.play();
-            playerPanel.revalidate();
-            playerPanel.repaint();
+            playerTurn();
         }
         if (e.getSource() == newGameBtn) {
             startNewGame();
